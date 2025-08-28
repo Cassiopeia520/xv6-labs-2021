@@ -18,18 +18,17 @@ struct run {
   struct run *next;
 };
 
-// we must have the type_name(Keme) so we can establish the array of struct(kmems[NCPU])
-struct Keme{
+struct Kmem {
   struct spinlock lock;
   struct run *freelist;
 };
 
-struct Keme kmems[NCPU];
+struct Kmem kmems[NCPU];
 
 void
 kinit()
 {
-  // set eight "kmem" for eight cpus
+ // set eight "kmem" for eight cpus
   for(int i = 0; i < NCPU; i++){
     initlock(&kmems[i].lock, "kmem");
       // we build a single freelist to kmems[0] firstly 
@@ -133,4 +132,3 @@ kalloc(void)
   // Returns 0 if the memory cannot be allocated. 
   return (void*)0;
 }
-

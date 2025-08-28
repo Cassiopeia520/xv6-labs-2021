@@ -8,6 +8,6 @@ struct buf {
   struct buf *prev; // LRU cache list
   struct buf *next;
   uchar data[BSIZE];
-  int timestamp; // the timestamp of current block 
+  uint timestamp;  // the time stamp of current block 
 };
 

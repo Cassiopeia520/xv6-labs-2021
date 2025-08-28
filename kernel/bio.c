@@ -44,7 +44,7 @@ binit(void)
   struct buf *prev_b;
 
   initlock(&bcache.lock, "bcache");
-  
+
   for(int i = 0; i < NBUK; i++){
     initlock(&bcache.buckets[i].lock, "bcache.bucket");
     bcache.buckets[i].head.next = (void*)0; // setting 0 for each tail of bucket
@@ -73,7 +73,7 @@ bget(uint dev, uint blockno)
   int buk_id = hash(dev, blockno); // get buk_id by mapping of hash
 
   // Is the block already cached?
-  // atmic: one bucket.lock only be acquired by one process
+  // atomic: one bucket.lock only be acquired by one process
   acquire(&bcache.buckets[buk_id].lock);  
   b = bcache.buckets[buk_id].head.next; // the first buf in buckets[buk_id]
   while(b){ 
@@ -92,11 +92,11 @@ bget(uint dev, uint blockno)
   // Recycle the least recently used (LRU) unused buffer.
   int max_timestamp = 0; 
   int lru_buk_id = -1; //
-  int is_better = 0; // we has better lru_buk_id?
+  int is_better = 0; // we have better lru_buk_id?
   struct buf *lru_b = (void*)0;
   struct buf *prev_lru_b = (void*)0;
   
-  // atmic: we alway lock buckets[lru_buk_id] to avoid be used by other process
+  // atomic: we alway lock buckets[lru_buk_id] to avoid be used by other process
   // find lru_buk_id when refcnt == 0 and getting max_timestamp in each bucket[i]
   struct buf *prev_b = (void*)0;
   for(int i = 0; i < NBUK; i++){
@@ -133,7 +133,7 @@ bget(uint dev, uint blockno)
   }
 
   // cache lru_b to buckets[buk_id]
-  // atmic: one bucket.lock only be acquired by one process
+  // atomic: one bucket.lock only be acquired by one process
   acquire(&bcache.lock);
   acquire(&bcache.buckets[buk_id].lock);
   if(lru_b){
@@ -143,7 +143,7 @@ bget(uint dev, uint blockno)
 
   // if two processes will use the same block(same blockno) in buckets[lru_buk_id] 
   // one process can check it that if already here we get it
-  // else, we will use same block in two processes and cache double
+  // otherwise, we will use same block in two processes and cache double
   // then "panic freeing free block"
   b = bcache.buckets[buk_id].head.next; // the first buf in buckets[buk_id]
   while(b){ 
@@ -229,4 +229,5 @@ bunpin(struct buf *b) {
   b->refcnt--;
   release(&bcache.buckets[buk_id].lock);
 }
+
 
